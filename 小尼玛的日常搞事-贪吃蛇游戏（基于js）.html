@@ -1,0 +1,151 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<HEAD>
+		<TITLE>小尼玛的日常搞事[1]Hx's Daily Making Things</TITLE>
+		<META NAME="Generator" CONTENT="Notepad++">
+		<META NAME="Author" CONTENT="Hx">
+		<META NAME="Keywords" CONTENT="">
+		<META NAME="Description" CONTENT="">
+		<style type="text/css">
+			body{
+				background:#A8E4D3;
+			}
+			h1{
+				text-align:center;
+				font-family:"楷体";
+				text-shadow:2px 2px 10px #000;
+				color:#fff;
+			}
+		</style>
+	</HEAD>
+ 
+	<BODY>
+			<h1>小韩枭的日常搞事--Gluttonous Snake</h1>
+		<div align=center>
+			<canvas align=center id="myCanvas" width="450" height="450" 
+			style="border:1px solid #000;background: #3A63D6;" >
+			</canvas>
+		</div>
+		<!--
+		一·画出可见的部分
+		1.绘制表格 长30 宽30 每个正方形的边长15
+		2.在第一行画一条蛇
+		3.在中央画吃的
+		
+		二·让蛇动起来
+		1.先让蛇头可以动
+		2.让尾巴动
+		3.蛇吃食物
+			1）增加蛇的长度
+			2）产生新的食物
+			3）食物产生的位置随机
+			
+		三·自己运动与判断死亡
+		-->
+		<script type="text/javascript">//加功能
+			//获取绘图环境
+			var canvas=document.getElementById("myCanvas");//获取myCanvas这个对象
+			var cxt=canvas.getContext("2d");
+			var width=15;
+			//画一个表格 30 30
+			
+			//定义蛇的身体节点对象
+			//上2下-2左1右-1
+			function Cell(x,y,f){
+				this.x=x;
+				this.y=y;
+				this.f=f;
+			}
+			//定义一个食物对象
+			function Food(x,y){
+				this.x=x;
+				this.y=y;
+			}
+			var food=new Food(15,15);
+			
+			//初始化蛇的身体
+			var snake=[];//蛇的数组
+			var len=6
+			for(var i=0;i<len;i++){
+				snake[i]=new Cell(i,0,-1);
+			}
+			
+			//画蛇的方法
+			function drawSnake(){
+				//画图前必须清空画板
+				cxt.clearRect(0,0,450,450);
+				cxt.strokeStyle="white";
+				for(var i=0;i<30;i++){
+				cxt.beginPath();
+				cxt.moveTo(0,i*width);//移画笔
+				cxt.lineTo(450,i*width);//开始画线
+				cxt.closePath();
+				cxt.stroke();//画制
+				}
+				for(var i=0;i<30;i++){
+					cxt.beginPath();
+					cxt.moveTo(i*width,0);
+					cxt.lineTo(i*width,450);
+					cxt.closePath();
+					cxt.stroke();
+				}
+				for(var i=0;i<len;i++){
+					cxt.fillStyle="black";
+					if(i==len-1){
+						cxt.fillStyle="red";
+					}
+					cxt.beginPath();
+					cxt.rect(snake[i].x*width,snake[i].y*width,width,width);
+					cxt.closePath();
+					cxt.fill();//注意与stroke分开
+				}
+				//食物
+				cxt.fillStyle="yellow";
+				cxt.beginPath();
+				cxt.rect(food.x*width,food.y*width,width,width);
+				cxt.closePath();
+				cxt.fill();
+			}
+			
+			//移动蛇的头部的方法
+			function moveSnake(direction){
+				var newSnake=[];
+				var head=snake[snake.length-1];
+				var newcell=new Cell(head.x,head.y,head.f) ;
+				for(var i=1;i<snake.length;i++)
+				{
+					snake[i-1]=snake[i];
+				}
+				//newSnake[snake.length-1]=newcell;
+				newcell.f=direction;
+				switch(direction){
+					case 2:newcell.y--;break;//上
+					case 1:newcell.x--;break;//左
+					case -2:newcell.y++;break;//下
+					case -1:newcell.x++;break;//右
+				}//为什么必须新建一条蛇呢？不用，但是必须新建一个Cell来保存Head紧跟的那个Cell的状态
+				//newSnake[snake.length-1]=newcell;
+				snake[snake.length-1]=newcell;
+				//snake=newSnake;
+				drawSnake();
+			}
+			drawSnake();//画蛇
+			
+			//监听键盘事件(37为左键，40为下键绕一圈)
+			//上2下-2左1右-1
+			document.onkeydown=function(e){
+				var code=e.keyCode;
+				var direction;//方向
+				switch(code){
+					case 37:direction=1;break;
+					case 38:direction=2;break;
+					case 39:direction=-1;break;
+					case 40:direction=-2;break;
+				}
+				moveSnake(direction);
+			}
+			
+		</script>
+	</BODY>
+</HTML>
