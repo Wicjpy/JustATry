@@ -5,14 +5,14 @@
 #define GPIO_DIG P0
 #define GPIO_KEY P1
 uint STH0,STL0,voice[6]={0},code sound[]={64021,64103,64185,64260,
-				 					   	64400,64463,64524,64580,
-				 						64684,64732,64777,64820,
-							 			64898,64934,64968,64994,
-				 						65030,65058,65085,65110,
-							   			 65157,65178,65198,65217};//吉他前3品的所有音阶?若T值太低会发不出音？ 
+				 	64400,64463,64524,64580,
+				 	64684,64732,64777,64820,
+					64898,64934,64968,64994,
+				 	65030,65058,65085,65110,
+					65157,65178,65198,65217};//吉他前3品的所有音阶?若T值太低会发不出音？ 
 uchar Time,KeyValue,Irvalue,code smgduan[23]={0x39,0x3d,0x79,0x71,0xde,0x77,0x3f,0x06,0x5b,
-														0x4f,0x66,0x6d,0x7d,0x07,0x7f,0x6f,0x77,0x7c,
-														0x39,0x5e,0x79,0x71,0X76};//显示c~a和弦
+					0x4f,0x66,0x6d,0x7d,0x07,0x7f,0x6f,0x77,0x7c,
+					0x39,0x5e,0x79,0x71,0X76};//显示c~a和弦
 sbit LSA=P2^2;
 sbit LSB=P2^3;
 sbit LSC=P2^4;
@@ -37,35 +37,43 @@ void KeyDown(void);
 void Toperate(void);
 void display(void); 
 void Irray(void);
+
 //主函数 
 void main()
 {		
-	while(1)
+	while(1)//设定和弦环境
 	{
 		uint j=100;
 		init();
 		KeyDown();
 		yjjudge(KeyValue);//键值输和弦 
-		Irray();	//读取红外线值
-		Toperate();//将红外键值转换成定时器初值
 		while(j--)
 		{	
 			display();
 		}//数码管亮时会调用P2，因此不能在使用数码管时读取红外键值 
-		while(Irvalue!=0)
+		while(1)//拨弦
 		{
-			TH0=STH0;
-			TL0=STL0;
- 		    TR0=1;
-			delay(10000000);//每当有弦拨动时输出一定时间的音然后停止
-			TR0=0;
-			Beep=1;
-			break;
-		}
-		while(1)
-		{
-			if(P2^0!=0)//重新赋值的条件为1)和弦改变2)音阶改变
-			break;
+			Irray();	//读取红外线值
+			Toperate();//将红外键值转换成定时器初值
+			while(Irvalue!=0)
+			{
+				TH0=STH0;
+				TL0=STL0;
+	 		    TR0=1;
+				delay(10000000);//每当有弦拨动时输出一定时间的音然后停止
+				TR0=0;
+				Beep=1;
+				break;
+			}
+			while(1)
+			{
+				GPIO_KEY=0x0f;
+				if(P^2!=0||GPIO_KEY!=0x0f)//重新赋红外键值的条件为1)和弦改变2)红外线值改变
+					break;
+			}
+			GPIO_KEY=0x0f;//如果是和弦改变，那么跳出循环重新设定和弦环境
+			if(GPIO_KEY!=0x0f)
+				break;
 		}
 	}
 }
