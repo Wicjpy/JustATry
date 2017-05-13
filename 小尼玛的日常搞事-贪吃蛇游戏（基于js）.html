@@ -2,7 +2,7 @@
 <HTML>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<HEAD>
-		<TITLE>小尼玛的日常搞事[1]Hx's Daily Making Things</TITLE>
+		<TITLE>小韩枭的日常搞事[1]Hx's Daily Making Things</TITLE>
 		<META NAME="Generator" CONTENT="Notepad++">
 		<META NAME="Author" CONTENT="Hx">
 		<META NAME="Keywords" CONTENT="">
@@ -21,7 +21,7 @@
 	</HEAD>
  
 	<BODY>
-			<h1>小韩枭的日常搞事--Gluttonous Snake</h1>
+			<h1>小尼玛的日常搞事--Gluttonous Snake</h1>
 		<div align=center>
 			<canvas align=center id="myCanvas" width="450" height="450" 
 			style="border:1px solid #000;background: #3A63D6;" >
@@ -44,6 +44,7 @@
 		三·自己运动与判断死亡
 		-->
 		<script type="text/javascript">//加功能
+		
 			//获取绘图环境
 			var canvas=document.getElementById("myCanvas");//获取myCanvas这个对象
 			var cxt=canvas.getContext("2d");
@@ -57,11 +58,14 @@
 				this.y=y;
 				this.f=f;
 			}
+			
 			//定义一个食物对象
 			function Food(x,y){
 				this.x=x;
 				this.y=y;
 			}
+			
+			//地图在中间产生食物
 			var food=new Food(15,15);
 			
 			//初始化蛇的身体
@@ -71,11 +75,12 @@
 				snake[i]=new Cell(i,0,-1);
 			}
 			
-			//画蛇的方法
+			//刷新地图(之前认为只画蛇但加入了food和清图)的方法
 			function drawSnake(){
 				//画图前必须清空画板
 				cxt.clearRect(0,0,450,450);
 				cxt.strokeStyle="white";
+				//画表格线
 				for(var i=0;i<30;i++){
 				cxt.beginPath();
 				cxt.moveTo(0,i*width);//移画笔
@@ -90,9 +95,10 @@
 					cxt.closePath();
 					cxt.stroke();
 				}
-				for(var i=0;i<len;i++){
+				//画蛇
+				for(var i=0;i<snake.length;i++){
 					cxt.fillStyle="black";
-					if(i==len-1){
+					if(i==snake.length-1){
 						cxt.fillStyle="red";
 					}
 					cxt.beginPath();
@@ -100,12 +106,21 @@
 					cxt.closePath();
 					cxt.fill();//注意与stroke分开
 				}
-				//食物
+				
+				//画食物如果吃到食物
+				//var head=new Cell;
+				var head=snake[snake.length-1];
+				if(head.x == food.x && head.y == food.y)
+				{
+					randomFood();
+
+				}
 				cxt.fillStyle="yellow";
 				cxt.beginPath();
 				cxt.rect(food.x*width,food.y*width,width,width);
 				cxt.closePath();
 				cxt.fill();
+
 			}
 			
 			//移动蛇的头部的方法
@@ -113,10 +128,6 @@
 				var newSnake=[];
 				var head=snake[snake.length-1];
 				var newcell=new Cell(head.x,head.y,head.f) ;
-				for(var i=1;i<snake.length;i++)
-				{
-					snake[i-1]=snake[i];
-				}
 				//newSnake[snake.length-1]=newcell;
 				newcell.f=direction;
 				switch(direction){
@@ -124,14 +135,27 @@
 					case 1:newcell.x--;break;//左
 					case -2:newcell.y++;break;//下
 					case -1:newcell.x++;break;//右
-				}//为什么必须新建一条蛇呢？不用，但是必须新建一个Cell来保存Head紧跟的那个Cell的状态
+				}//为什么必须新建一条蛇呢？不用，但是必须新建一个Cell来保存Head的改变状态
 				//newSnake[snake.length-1]=newcell;
-				snake[snake.length-1]=newcell;
-				//snake=newSnake;
+				//判断是否吃到食物
+				if(newcell.x == food.x && newcell.y == food.y)
+				{
+					len++;
+					snake[len-1]=newcell;
+				}
+				else
+				{
+					for(var i=1;i<snake.length;i++)
+					{
+						snake[i-1]=snake[i];
+					}
+					snake[snake.length-1]=newcell;
+					//snake=newSnake;
+				}
 				drawSnake();
 			}
-			drawSnake();//画蛇
 			
+			drawSnake();
 			//监听键盘事件(37为左键，40为下键绕一圈)
 			//上2下-2左1右-1
 			document.onkeydown=function(e){
@@ -143,9 +167,34 @@
 					case 39:direction=-1;break;
 					case 40:direction=-2;break;
 				}
-				moveSnake(direction);
+				if(snake[snake.length-1].f-direction!=0&&snake[snake.length-1].f+direction!=0&&code>=37&&code<=40)
+				{
+					moveSnake(direction);
+				}
 			}
 			
+			//随机产生食物
+			function randomFood(){
+				//0-1
+				var foodX=Math.ceil(Math.random()*29);
+				var foodY=Math.ceil(Math.random()*29);
+				//判断蛇的坐标会不会跟食物坐标冲突
+				for(var i=0;i<snake.lenth;i++)
+				{
+					if(snake[i].x==foodX && snake[i].y==foodY)
+					randomFood();
+				}
+				food=new Food(foodX,foodY);
+			}
+			
+			//自动行进起来
+			function moveClock()
+			{
+				moveSnake(snake[snake.length-1].f);
+			}
+			
+			//每五百毫秒调用一次moveClock
+			setInterval(moveClock,500);
 		</script>
 	</BODY>
 </HTML>
